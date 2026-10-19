@@ -3,9 +3,6 @@ title: How It Works
 permalink: /how-it-works/
 description: The thread, the protected payload, and what each side records.
 ---
-<!-- DRAFT for Josh. Claims trace to RCP-57 and to the reference implementation
-     in reference/src. The purity rule and the Note-for-verbless-state rule are
-     both enforced in code, not just described. -->
 # How It Works
 
 ## The Thread

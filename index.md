@@ -3,9 +3,6 @@ title: Home
 permalink: /
 description: A standard way for offers to travel between the systems that make and receive them, without either side giving up its own.
 ---
-<!-- Landing page. DRAFT for Josh. Every factual claim traces to RCP-57 or to the
-     reference implementation; nothing here is invented. The register follows
-     uli.reso.org so the two specification sites read as one system. -->
 # Offer Management
 
 An offer is a conversation, and today it travels as forms, PDFs and email between systems that cannot speak to each other.
