@@ -1,0 +1,983 @@
+<title>Two Sides Of An Offer</title>
+<style>
+  :root {
+    --paper:#f7fafc; --raised:#ffffff; --sunk:#edf2f7;
+    --ink:#1a202c; --soft:#4a5568; --faint:#718096; --rule:#e2e8f0;
+    --buyer:#1a2f58; --buyer-bg:#e0f4f8;
+    --lister:#38a169; --lister-bg:#e6f7ed;
+    --warn:#b7791f; --warn-bg:#fff3e0;
+    --gold:#b7791f;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;
+    --serif:Georgia,'Times New Roman',serif;
+    --sh:0 1px 2px rgba(26,32,44,.06),0 4px 12px rgba(26,32,44,.05);
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --paper:#171923; --raised:#1a202c; --sunk:#2d3748;
+    --ink:#e2e8f0; --soft:#a0aec0; --faint:#718096; --rule:#2d3748;
+    --buyer:#63b3ed; --buyer-bg:#1a365d;
+    --lister:#68d391; --lister-bg:#1c4532;
+    --warn:#f6ad55; --warn-bg:#3d2e12;
+    --gold:#f6ad55;
+    --sh:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  }}
+  :root[data-theme="dark"]{
+    --paper:#171923; --raised:#1a202c; --sunk:#2d3748;
+    --ink:#e2e8f0; --soft:#a0aec0; --faint:#718096; --rule:#2d3748;
+    --buyer:#63b3ed; --buyer-bg:#1a365d; --lister:#68d391; --lister-bg:#1c4532;
+    --warn:#f6ad55; --warn-bg:#3d2e12; --gold:#f6ad55;
+    --sh:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{margin:0;text-wrap:balance}
+  button{font:inherit}
+  :focus-visible{outline:2px solid var(--buyer);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px;padding-block:32px 60px}
+
+  header.mast{margin-bottom:22px}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .mast h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,42px);line-height:1.08;margin:8px 0 10px}
+  .mast p{margin:0;color:var(--soft);max-width:62ch;font-size:15.5px}
+
+  .listing{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--raised);border:1px solid var(--rule);border-radius:12px;padding:14px 18px;margin:22px 0 20px;box-shadow:var(--sh)}
+  .listing .addr{font-family:var(--serif);font-size:20px;flex:1 1 240px}
+  .listing dl{display:flex;gap:22px;margin:0;flex-wrap:wrap}
+  .listing dt{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .listing dd{margin:2px 0 0;font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+
+  .desks{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media (max-width:880px){.desks{grid-template-columns:1fr}}
+  .desk{background:var(--raised);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--sh);overflow:hidden;position:relative}
+  .desk-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--rule)}
+  .who{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+  .buyer .who{background:var(--buyer-bg);color:var(--buyer)}
+  .lister .who{background:var(--lister-bg);color:var(--lister)}
+  .who-name{font-weight:600;font-size:14.5px;line-height:1.25}
+  .who-role{font-size:12px;color:var(--faint)}
+  .bell{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:20px;background:var(--warn-bg);color:var(--warn);opacity:0;transition:opacity .2s}
+  .bell.on{opacity:1}
+
+  .thread{padding:14px 16px;display:grid;gap:10px;min-height:190px;background:var(--sunk)}
+  .msg{border-radius:10px;padding:11px 13px;background:var(--raised);border:1px solid var(--rule)}
+  .msg.mine{border-color:transparent;background:var(--buyer-bg)}
+  .lister .msg.mine{background:var(--lister-bg)}
+  .msg-top{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .msg-who{font-size:12.5px;font-weight:600}
+  .msg-time{font-size:11px;color:var(--faint);margin-left:auto;font-variant-numeric:tabular-nums}
+  .msg-body{font-size:13.5px;color:var(--soft)}
+  .terms{display:flex;gap:16px;flex-wrap:wrap;margin-top:7px}
+  .terms div{font-size:12px;color:var(--faint)}
+  .terms b{display:block;font-size:14.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .empty{color:var(--faint);font-size:13.5px;text-align:center;padding:34px 10px}
+
+  .actions{padding:13px 16px;border-top:1px solid var(--rule);display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .btn{cursor:pointer;border:1px solid var(--rule);background:var(--raised);color:var(--ink);border-radius:8px;padding:8px 14px;font-size:13.5px;font-weight:600}
+  .btn:hover{border-color:var(--faint)}
+  .btn.primary{background:var(--ink);color:var(--raised);border-color:var(--ink)}
+  .buyer .btn.primary{background:var(--buyer);border-color:var(--buyer);color:#fff}
+  .lister .btn.primary{background:var(--lister);border-color:var(--lister);color:#fff}
+  .btn.primary:hover{opacity:.9}
+  .btn.quiet{color:var(--warn);border-color:transparent;background:transparent;padding-inline:8px}
+  .waiting{font-size:13px;color:var(--faint)}
+
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+  .p-open{background:var(--buyer-bg);color:var(--buyer)}
+  .p-done{background:var(--lister-bg);color:var(--lister)}
+  .p-end{background:var(--warn-bg);color:var(--warn)}
+
+  form.compose{padding:14px 16px;border-top:1px solid var(--rule);display:grid;gap:11px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  @media (max-width:420px){.row{grid-template-columns:1fr}}
+  label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600;display:block;margin-bottom:4px}
+  input,select{width:100%;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--rule);border-radius:7px;background:var(--sunk);color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:11px 17px;border-radius:9px;font-size:13.5px;font-weight:500;box-shadow:var(--sh);z-index:20;display:flex;gap:10px;align-items:center;max-width:min(92vw,460px)}
+  .toast b{color:var(--gold)}
+
+  .wire{margin-top:20px;background:var(--raised);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
+  .wire summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:10px}
+  .wire summary::marker{color:var(--faint)}
+  .wire .inner{padding:0 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:880px){.wire .inner{grid-template-columns:1fr}}
+  .wire h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .wire p.cap{margin:0 0 8px;font-size:13px;color:var(--soft)}
+  pre{margin:0;padding:13px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre}
+  .k{color:var(--buyer)}.s{color:var(--lister)}.n{color:var(--warn)}
+
+  .net{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--raised);border:1px solid var(--rule);border-radius:12px;padding:11px 16px;margin-bottom:18px;box-shadow:var(--sh)}
+  .net .dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+  .net .dot.live{background:var(--lister)}
+  .net .nm{font-weight:600;font-size:14px}
+  .net .sub{font-size:12.5px;color:var(--faint)}
+  .net .count{margin-left:auto;font-size:12.5px;color:var(--soft);font-variant-numeric:tabular-nums}
+
+  .prov{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--faint);width:100%;margin-top:6px;flex-wrap:wrap;row-gap:4px}
+  .prov .step{display:flex;align-items:center;gap:6px}
+  .prov .step b{font-weight:600;color:var(--soft)}
+  .prov .step.done b{color:var(--lister)}
+  .prov .arrow{color:var(--rule)}
+  .listing.unpub{border-style:dashed}
+  .signin{padding:18px 16px;display:grid;gap:11px}
+  .signin p.lead{margin:0;font-size:13.5px;color:var(--soft)}
+  .signin .fine{margin:0;font-size:12px;color:var(--faint)}
+  .tokenchip{font-family:var(--mono);font-size:11px;color:var(--soft);background:var(--sunk);border:1px solid var(--rule);border-radius:6px;padding:3px 7px;margin-left:auto;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  footer{margin-top:26px;font-size:12.5px;color:var(--faint);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  footer button{cursor:pointer;background:none;border:0;color:var(--buyer);font-size:12.5px;font-weight:600;padding:0;text-decoration:underline}
+
+  .pure{font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;margin-bottom:8px;border:1px solid transparent}
+  .pure:empty{display:none}
+  .pure.ok{color:var(--lister);background:var(--lister-bg);border-color:var(--lister-bg)}
+  .pure.bad{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-bg)}
+</style>
+
+
+<header class="reso-header" id="resoHeader">
+  <a class="brand" href="../">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABICAYAAABMb8iNAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABLKADAAQAAAABAAAASAAAAAB/joDPAAACV2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+QWRvYmUgSWxsdXN0cmF0b3IgMjQuMSAoV2luZG93cyk8L3htcDpDcmVhdG9yVG9vbD4KICAgICAgICAgPGRjOnRpdGxlPgogICAgICAgICAgICA8cmRmOkFsdD4KICAgICAgICAgICAgICAgPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij5SRVNPLUxvZ29fSG9yaXpvbnRhbF9XaGl0ZV9DTVlLPC9yZGY6bGk+CiAgICAgICAgICAgIDwvcmRmOkFsdD4KICAgICAgICAgPC9kYzp0aXRsZT4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cnd2Nq0AACJgSURBVHgB7Z0JuBxVlccJshP2sC8Jq7Ivw6YQFgVEcGF1lxkFFHD4xlEGgqJsiiCLICggSzKALIIsioCCCMgyQkBBIQGEkAQwJCQQEgIhQOb3a6pe+rWvu091V9Xr9/LO9/1zq+qee+45dzn33FvVeYMWGKCBFhhogZZbYO7cuYMovGACr6tpLjfvikGDBnnd8YQ970NJ7am2Rd0rtmCH9vQaVZRCSRVcsgUt3qGMeKuTOwT7FkJHkXYGlw1pFvZoVy5E/UsgqHoA5CK3jpDKBCHP9O0i+iVpz0Xr1N9pj9/Ic5Jh+8IYqO3C6+USDCZ1fFXTW9y8DqYn8F7MNi2ib5AbJmxxTC4CFktSfcAKYNnknqSLZnA1LcEc0jfBbGx4mzQXStpWfaQ5yLatupGTWFoZfK1yFf/HCf0KeB48QWWTSGf0diegwwJJR9gJi4NlwBoJViS1M3TQjehyMp9pxBDNQxd1+ALQaZVBM6lETAYvUf9UUifIGyCvSbIBsvYAfSFquB49J4KWiTbUETmZdUofANuAzZLrlUiXBub35LBsdye7/TAOjAF/AX9Hrn00C7xZ5ryhXh1t6pw253p7oD3rAh3wUiB1HFxW+lnH+xp4CTwBHgEPIuspUvNc5FsaD0n76ijVwbHl/HyW5w+TTkOuDrJCaYS1FXdmtkIqaUdcDS4F46kgN6+LvDBhoPY4qBxEO4LdwNZgTWAHRWlPbPhdlLkRHzrZEWPBkEZ8BeS5Ak4D9o19ey8YDaaCmdjXcmiPTQcj42LQF+gj2HpnK4pipw5oKbA++DjYG2wMXAzbJRf6+8At4B7wMngdXVua9JRtStizEExLA53UfmBPoJNqNfrXgTmmbgC3gUkgkw3opHPaApwINgRTgGPT4GIiOBncS7vM8ykU2gLkQQ8hZAegBy+VqHNxsAE4AYwB7dDueSmPEsuDF9pRJseyjyPrFLA5WBq0NFAp9x+gr9AurfQlxi0JtgLngcmgSHoM4SPAOsCIPHdCrv29M7gMTAd5k3PuGDAUhI8L4F0PWPZW8HmwHbDddwS/ABOBQcc84kFeDgtRc8eB4cDVqRSirmWBk8itaR7UXx1W2jYOghPBUJB5caFMv3VY2DYIrAD+G9hOZZLbxEOA9Tc7tgjNLeQsBFYHJ4OpoGhym7gPMJJrSPDY1heDR8EQcDtwDj8MLgHLAJ/dAub5E27ydFiIq3jMTUlbWsEbWlmVqXywCvgZmAPyov7usNJ2+j8udgOZVnX4+6XDwq4FgVHOlaA36Roqd/5UnyNVjfzYJeUXBUYsd4Ey6XUqM5JfEdT1AeQZaBi9Vs7PSceBc8EB4G2wJdgDKG+YVufixXtovg/w7Dyweg95eT5aDWEXgsOB+/MBytYC28F+JfgsA6KslwLZNCyJG/udWI7bUeBzoDfp01T+S+BkbalfKOci9LFEzs6kZZI6HwvOB8PQpZ6f8QXYYuBxIM0Gnq99FjwNPM/y5ZfR1fKgMIel7J3AGSirUrlTIvdMBH8yd+Hzl0APN11cPD8Inz30wyYaik0XgeEdYpvO83JwUNZ+gV8ncAAYCdYCvUX7U/GlwKi1p0hLB/UOcAxK8rwOdgB3gBeAL9Dk8SVSoQ5L+Z8BX0PZeh5WnsyEvCUpdBxQ/gC13wKuiGeBvWjbeWcF7cvtExKw2TeBp4MPtaiwb/acVHOq4P27oB1ysT8FbBQVgi3uNHyj6SJUSLAQ1SXh24XUN8o9OU4jqMeAW0DHoO14KzgHaIPOah8wAUwEpWyjvkU9v0GhMXm8skXOMsj7JvgG6G/kh3LtDHJXKAdsK07HSXsumAQeAHmQtmhTb1LD9mQ8eU50FDAiyUJGB9PAK1WpH4j6+t0F2gk4GDhePYD2WgdiO0cX8OfhPRU8AZoStih3b/AzYJ1ZSGcxE7yapNpn3zmmjNi0R5nak/VsbWfKXIB+X8UHVBwP9wv4qQLPTuRSh2YfXAV0YOOBnwMdDfYFx8I7g7QUh2W4tz84G+X8erUS2ll5VqK8+/LPAY1rZVJmrbJs/rupcGoblfrGz73+EOAHgKYOtiitDuNxtPPn6ScnX7vkhL6jXSFtln+5SfnNyT+iCU91tlGUjuRR8CfwMHgO6Lic5E58yb5wi20/rAreDzYDWwKjjVWA+fXIOoyuLqAvUpn1eNPnG3DxfZBusdLnjVJlTwY6ktFAh/EkcBw6V3WCOll13hRsBbTFsaITi9KeMH6TsfUd7JmVFuL6Tp5pp+fQOmad5PZAx/hv4AJwHajQQulFweleyL8a+NZgNEpmXnUp5wDQ6JNAloaCvU+QW4gTgIOmVbKNXMXXANuAnYADzMFmXoQ+CpOr9JUR5iY8T5P/7014is424umRkjH1dTJ17BFylf8zGAluYRwbjdQjx7jnMTrtZ8C9YAHqHEqyK/gE2BrYV7UR1/M8y+SskOucOApsAqI0E8Yx4EZwExiLTY7DnuhBHl5HPS6Iw8GBSbom6SAQoUNg+gO4uZqZOv204XGe7Qt0UraHDvQY8AfydarzCOa8P2tAZDd6lTvfFvwP2AVEDawoKT/YETwJyqDd5rVOe1couzyIfDhqeKyTyY2QtxTwfOAOMANE6T4YXVV7JPL+IyioMkl7FNIBD7FhYzA1aMtr8F0EhuWhOnIcF4cC23omSMlvvw4HWeeIbxSr5aTy6qVTyBgJtmjFHsoNBn4z5jdUWT4puht+t5Y9Enl+AL5kj5npQxiKdljvUsdm4MPgXrBxWncklR/cD8qgd6jEkDQXQlYWh7VtLpXWCEGHtcHlYBaI0GyYPlIjpuuWvP7isI6NNAY8b4GRwO1droTMTcAVYBp4HhwBsjqrxSjzaxAlnfQpwG1XW4QMA5AHgPMmQi7MB7RbqT/VKJr8+l3vOQHcAAyFmxJ8a4LrQVnkpF6/qWJBBmT1usNSVfTwA9vfAhePCP20nokU7vMOCxsWBvdEGgKeh4Fbn0II2Y4RPwE6EmRyVipEmW1ANLp6A17Pk7OcbTa0G1k7gDEgSn65vkhDoXUy072zB4mZz5XqyOzp8Ts89EeRb5A+CvYBx6D0ENK6RP6KZB4L3NuWRZ45iH5FtP0kDPoeMI1QZYGJMPZRnlXQOxLpOzfOof08UymEkO14c5z/lOvu5zWxGp0fjbdR8+T8icuTqefNeY/au0LWfcoErwUl7QDfekHebmypw3qZp1O75eR7MxlxLyYiJyTpYaTu4Xs8K+G5+9yvJkiKlJI8Ry3TS6mp5EoYWA9T5TXBateBzwPi/kofwLDlAsaNg6fbIXGgTGYW+sY36O9mLcg88c35HsFyviT4AfUUMdevRfYtQT2c27sEebuxpQ5LA57qlpPvzT2Im1IjciHuXVU8FF6sOi+5P5BnI8D7qvNKuH6EDq37ZqmE+ouu4moqiKyurtgtrYJFG5CTfB1yZPvlf23SyRH3MOzwM4MI3QFTIS9CaCMj0XPB6xFF4NmJeR5p/27iKg6Lytyy3d4tJ78bo5XLrCNRcPUq0UZXhpIexlccE6mObHfwfTAYlEk6Kl+79md6HOMmBA0cFuTri2zV47CR/n9plNkBeZuhQ2SeOMevSuZ6UWqPRvAjQeGbw9ctUImUqzishPEmUreGeZLnYm5B9OySbyU2qlzN+8eBcxrYKnFW23B9KvCMoWx6mgrdj/dbYsDOxLhnggauGOTri2yR7aB2Tepw43RYEXJu3x9hbJWHseV8jy74q8G7ata6qh2WH5BdBzLvo+tUqke/B7hn1hDpw2DtylX3fzbhVie1E/ghqHVqPCqc1NFIMG+nXbjiLVRQuz2vJ8JtYX8lz34i1OnHAxtEjIDH+R3t96DIHtn8wDTy4mAwfDqtTOT2q0JMVLds53CzI9CBtEuPIeAY5E5QELJdrQ8DXXX6vIpSZ9aTQ6tiK+TSBnb1GVWI9M4Tmi4gzTSLDLxmMjo1f05QsWgkFhSXHxtzyjOg6KT3t7wGEUXTU1TwOtAhNaIFyYxuy7vkWKiLMGgsN8eDF7oetnbxLMW+jbzKfpaGVflDgU6pEfWGs1IfVx/17fTwv1HbZclbIcg8O8jXF9l8Yxah3oj2I3rJsyhYKcjscUcZZBT3crCitraElTqYtNdz4ZlStNJa3V7igd953GYGzspG/SQ4GpT9xo8qm9JEOI5D3weacvYDBvpjYcxYK2jK5CBfX2SLbo98m9WpW2P1ahbJpH3TbhCSymmWGl1Na8aU5EcXzi5x3SKsrqfv/UL6Eu6jH4KlRV21zgOX+YCO1kENB55Ltf0zAGTkTQ7aU3FWN+QtuIPlDUW3dYL6TQjy9UW254JK+zbL3+m5/eo08i179Cyu1QAkk83MJbed0YVu2UzCYe7RYVGp+/sfgF+ByDc7sFX+vtqVpGdSPj24t7NPB41W9HrnJKkMihdCOuOfJyikgg4Vuhd6Rc5l/FWC5xH9lZ7EMG1sRu4QjgHrN2PshXydlRFzM3KOvdKMKcf86UFZmSPXHh2WleF0ZpB8C/wENHNahoFnAf+jrcogYEXalftLwRagET1Bph+uVpMe2udFkZGg33n5BrPT3wLl1gb0iX3xjaDAv8D3bJC3L7I9g9J/DSq+HXyjaL/PgOWDZcpgW4RKIg7L+evnLGWR8ytCS0SYqnnqOiyZmMx65XPB1cBQryfyuZHVz+CvbCGTifE9nhlhNSMPA68CaaRlZHU5eA4UQR4k60gvSZ1rEZV0mkz6ZE108hwx+mLjdtqn2ULVaWaG9Uls+124wAILfBBex/RRtKUfOg/JULYoVp1V5Fz4LfhEWWQAE6HMDqveJwZdldGx/pcXP+LBimDvrox5F7/l8gz4/ukjeJ0Q3wE7ex+gVeD5NnAV2wY8AC4COsG8SWfoSwV/zBo9GMxbh9Ll0ScbUenhYJ9g5bbNb4K8jdhs706mG1Hu68CxHSHbcSjw05+HaFej0HHgReDi7g/8PU4pi3RYDYOORBF1KlOvyi4r0AgRZ9tNTFOHJTed4H8d4RbKcNiVJqX7ufg++ZWzDnjseLeRnwT1Din19DZ0mr8B1x4I6hS/C04DM8B6ICUHvpFcJPxNy/SU3snDH6LvhJ4yO+BZrhOc/lgNm7YHnwV7gegB7a3w/h20S8uhw+7tCslQ/h/0rQ4kSmNgvAkcEi0An+cuw4EL7ETwLNBhvSSw1+MNoQNzXHue487jTXTLtX+RGaW5MIqyyLlaCIUcljXT2P7RzZO4PANsDDxjOonnD5EaWdmRruIHgUVAPTISewToXZ1QhtZrACM1Df09+Ddghz8JHAx29LZgddAqeV6hc/1bqwJKKOcE1+mnzjxapYPRMouCpcDKYB2wNdgBbAKiMv0Wzf9HfDZpu7QWAo5vV0iG8iPhvSTKj43+x3wXwr8rWDdaLuFzjFsmLWd7zQQ6JyNUx+8U4HlO6sx0YI5/x/Qk6n+DtAzynLbMs9rCormww0pa9XZSIyEd0/ngDqCzUs4XgM+dMI3IKMlOVJaRlBP01aTzbuBaeXb0iWAyWAZ8FLQTXT1H+R+Ae0Cn0oIo5kqvw4g6l1pbXDRShzWM69WBC0OU5sB4KXgwWqAJ39Lk79CEJ89sx1RW+gsFfgJcjB1rrZKLhVgBrF0lxMVWx6QjM/Kyf18A/2CcuyCP9bpg5+WuRpRFs4qqKJPDolH9+c61KKMjucf7RLG9SY8Cnkc1I6OqT4HFwXVAebUGPsMzO3ZPsA/YHSwLWiEHyVng1+hbZlicVVed1P4gjZaylpdfp9eqs7P8LeBC2qnMwW29eVE6HsPykjF9BQWGga8CnX6eZJ8oU6wKjHYlF+uJYAwYzby6j/Rh9KmdCzxumxxTZY79wqK5TA7LZqNBXS1u81qioXckOQ6s732QlofPc5UlwJ+RaSjdRdz73/jK8xWg02qV1NWQ3x8194VJmCUaarVN6pW7mww/85hQj6G/Psdm/z/1H2Of7f9F4NgrmoyEN0rwYVIjvdvR4zfo8zjXA9RDC2R2WNUyaFxXi+8Cz0qykI7kj+B60M1ZVQlxBfplcr8L6WLJdTRxtb0a+N/ORj9ki8ruT3yuhm6lfkQ7PdSfDMtiC7b712pOp4y7h88DnUlZtBwV6bS2AP43SxeT+uetMkeMlOvX1LLDolE9UB0BdsvYQh5A3gE8ZHcv788eHnDAcF0h7odxsS14BlwBPPOyniEgSr+D0UnoAecA9dwCk3hsP/ycdnqwZ5b55ylt4Cc852LxU+BAsCNwG1cWGdlZ7xpgaXS5EZ3eLqvyvlBPSw6LhrRh/wscABbMaKjRlaH33mA14LnXF5Hp5NkV3AkcJMcDn+lwPJd5E0TJSME3gmMtgOyluDZiG6D3WsC2GA1+DW6ibca993jgX9riNVrhWsbME6SOx53BlsAFemFQBn2QSty5eDRyAzrNLaPSvlBHZodFA3pYfig4GPhWJCutTIF9QVrW7ZqR1keAneSbKiMrB0gals/mOtpplj2FTn6AVGelnINIr+HZ0z6bT8l2Nbr9O/gz+KMpbZJlIaBIR5MLYS5EuzzOmDHSugvosLYC7wdrAxdZz6Byqw9ZtbQZD44DLtr312bOr/eZHBYdaAd9GhwJlmmx0XR41aQTWRIcDT4ERoDDwDiwKZBS5/beXf1/p5B1JrhZFvRNI8GvcLsG9ycwEB0A8yO55RsFdFh/px1mkhZNRnJGKmWQUbgLX25EG+nkK+3F2LmNa52VGAbWBEPAcmAF4FtssQRYDKhPu6Sj9M/hHYIuju1WSV3y0Cdafya/EhUqX1bBH6WMDmV1C+dEE5FzMNgpkbcr6UFgPEgdVpLVMHmd3AvA5XSuf13WQaNcnZUD6YtgMs/9GZFhf6eREeSTQDsig0t+J8eGIEKzYPKPECi/LJpARSeWVJltZvsVQonD0Gk8yBhyAXVM6axcFIXXOjCd10rJfZq3YnJvf2Ul59z+wLHdKi1CQVEWtWJnSLeww6KTtkOiW7YPhCTHmYbCqmyjN2lhoKPJsqK8A/9VwB9g+xdwPVc7AHjO5sCSlgSHgynkd+K3RjqgC4Fb2ig5MM4AHtI2o21h2BXc3Iwxx/xX6I9bc5TXEaKwySOKlxJ06cS4cj7ZJ0sBx53OS0emwxoG1gW+WXcOReeezvFryL6eeidz3QpZV7S+VuTXlnEOF0IhI2gsG9j99PYFaGEH1np/w21XqSjdBuPpdOikpMCHSUeA2kjQFfCbwEjrWvjf5bpTSIflx7iPRBXCBqMK++QbgTJu4Y+gzN3UMSPAnweL+s03RLu+jbGvJei2PaXddWK+ZHLXYNT0cbAKiJBzxMXmmghzDzz2Q5l9kQYfPajS3iMjkYZEQ9vIR4OPNWRsPbPWWaWSXFki9CBM1T/A3oJ7I8GN6xQexvNjgU6t0yi0gKRKM0F0cqNA6qjTrHqp2+7d62UOPC+uBVwkwJPgOmo5GZwJxgdrdFzsz1ysdQSesUUWXSMeURYtHqzInVEmauiwaCBX5SPBZ0FtY2WqqCDmp5Hr19n/p3z0HUbybTAcNKLNyfwu/Fs3YuojeY+j5w1BXd0WG2Wl2+RgsQG2PFuA8ToBeReAs8H0oOwPwucOoZp0WJFJb1AQDQCq5bd67TiL0KwIUzVPXYfFoB4M4+ngv0DUY1bLLvp6HBUcCipnMujr9s8zoP1AJPw12riUcm6p+iwx+N2GnAr+ETRiZ/gODvIOsBXUAvTbTESfD34WrMKdTu0C+xbPdFrNaDEYok6kmaxIvoFOhPJxWExio6mjwKdBJzqraejltu5+Ot6P63SuJwMnY5ZIcGP4f0T59Un7Mj2P8pcGDXB78VVsXjPIP8BWUAswdmcjehSYEqjC4GLDGr43uI84LBdwD//LomgEn/mNdb0I6xAsOxxEPWVZDWE9dvIPwM10+Jwq5+qr36xhr/YbYZ2GnJVI+yTptFH8FyAaZa0L75f6pLH9T+lnMWl00KxhNXy+PNFpRWhIhKldnmQ++lY0Qq9GmKp5/sVhUeEnYDB66dQJ/HN0G8UkTb2zE0/nujRohRamkG9tPNOq9wKgFblllzHKGhms1Cj0K9i7dpB/gK2gFmAcu6X/a1B87Zx0Dri1jJBHJmWQW08/54jQ1AhTNU83h8UAXo9Mt1ZDq5lKujZy8vC4UYhrx/pnxNwSesi+G8lxoLYjzc5CfjvzBbBvlkKdxJtEWVegUzTKGgbvlzvJhvlYl+eCttcezzhnot9mrR+so102o6toNPfPrJV1OSwmv/vc/wSbZBWSE/+FyDkGmPZEc3l4MZhgJvpuRHIKWMf7HMg9/jeQG91/51Bl7iKyRln+xrKsgZy7sf1IYHRb181kFinnxIvdHta/2ZC+znK+W19S45wNyI4c8HuMEdW9q8Yuh8WTYeBAUIZRVNONjKz88PNp0tPAtd1y37t5mcRzK9p9rhHRiWAroKPNi7ZE0B55CStbThJlXUm944N1e/B+aJB3gK24FvBYIkJO8lp6qvZBnfsNeW70UzRtSwWROelW9oWsylQ7rI9QeJWsAnLgfwAZxzHZjA4WSNLvcvlH76vIw8nUwL24/hjI27l6aL8PDjHS4LB2JE1Eq8uCmtn/n8NeB/MA9V4LRM+XevqFwmNBtd2mfSjI2xIb42gRCupHImR01fqWkMJWVO3AIpW2y+N5ywgwpkaQq4bP/1b13L8y4o+adVIHgUjYWVU8fOkK0eoBfriSohhpo3eQPQpEoywny2FggHqhBZLFcetg1RN64HOOePjejJw3Lk6mRZF2uOuJ0KMwvRlhrOapOCiMWJyHm1VnlHDtwfmxwP9t1L14FyX3D/PgKJB20kIJgwfs2yTXRSRrIFT0ZdJZ/W/QAKNJ/wT7pkH+fsmG/R/qpTYYRoNuH2zU2oXdYuPA2GD53eDbMcibiY22c1t7JIgGEv5uttu8j1SYRlSGi6tECuTEo2c9CdyC0nN6kslzI4W7wQgwHQylUdTXfbj6FkVuC8tsi9ztSNpOh5U6+2Z1uAh8PWnfZrz9Lh+7ncTnCq63K9nAg6kvMp49mDcq6Ub0tc9/3+1h/RtfKH0HG1eoz9JyzoGU9KgmQs7nuyKMtTypw/ID0TK3QedRn3/JZlatQtX35Pva9jfgBLAaGArUOY22uCyEymyLQgxA6Hig04rQIJj8SdMWEeb+xJM4qx8ntu9Aeh7P9gO2SaFEHUY8XwbpPGxU31gy/1GHwZdWkW2hxYcDvzn05zq5ELJsN8+do/PmPnjr2dJQp7Sh3NcW7QRSRa7i4iyc0Svpg0YpfDPJd+KNAnrwGeAtUCQZAfZpot2ynmUZuRplFXnG0VFtiq1GVmeBLUG6EHoGcxo4nvy1SAshZO+E4B8CF+II/ZY+rbfA/w0Bf4gIgUdH9SXwPXQwUGmLkLELAs4AGwQFOS5HYktLczh1WIWvJokxd5OegLKZ3g7Ar3M7E2isOmcqD39WejtrgQ7lH49el2XQbV94t8nA34w18xlFM4F55TPRdFY/Bjqoaift+FoPHAEuhu9gkNsRAbL8aziHIPscoKOM0Ksw9fSpT6Us88MF9qcgGmUtD++h4Gx0aSmqptzgKju2RlbqS7hsSPeS+/uGHA0yy4qqVMEDw2PA095kJTrlRRroZsp5uPcQcHs4QA1agDbzL3VfDsvBILKSLwffkZQZTdk8nPZSyNoOmWUtiFT1LzQGW6ZXP0WnamdVb6IZce4KjBwOpIyL7Z+A8qaShomy2r8msN5Pgg8m99F2uQ5+t4SNSEdwNbCvIzQEpgPAxuh3I+lNYKxjhrQuwauzGw4OTFLtitoxE962/ovyshzWSyg6AvinuNtZdV9AxqLgV2A/UG+wkTVASQuMI/0F+J9gi+wNnxPrriB/I7b1ybyoEUMJeU5gF7gKMeF24eJ0YHTTbPw4P1wYdfZGIp8H/sHVJ0mf8xpMAUY2Hn6/C6RFwGCg01sb2A6bACf3qsC38lGaAOO5zJu3GhUgfxZ6uTVzgbCuCKnj1sCt775gNDIeIzWo0C4jN9toKSDPpmAr8H6wOlgCZKGLYb4zS4Fa3jIclvvu48HtNOrbtQpkuU+c3Zs06u2UGw22zVJ+fuS1zWmvS7D9CyASZXmu4X/yd2+7/YUcB7SDvDdpyZrKdcY6q/fVPG90uzCZKydwshohpU5qNteOax1Kuhg7ryzjeZFt4IRXjyx1wl75Xe2PSJ/wJkBPwXMcuAjoLCNkdKRtKwFt2xsYCWmXNpmf2uGhuuNDh5yVbqOAZ9f6g5apaIflivMd4P+uYAPkQsiayoQ6GmG/AkW8os1Fzw4S4kC+AJwU1MltiwPXbUJ/I9vByXlki4bpiJZN0KKIcLHT4bwkunDA5/8N91vKHGE5oIOJko5JxyryprsReBj6GZG2RWlI7Mqgc8mbfoLAi1A0N2dVpeD9XB8FipBdVU3fv6T97d9LwfigNYvC900Gv2m/ItriZQz6HjgBdPLYuRD9TkNft2Vhgt9o72bwn+DVcMHiGO9C9CHArW3blDos9995d97PkXkSDWjonDshdw5CrwEn5y68fwp8EbMuzmDa9vAaafU7Yuw4kc8Ch4KoEy+rHd6hIreBx6Lna61USjmd3HXgyyAXR9GKHpS5HnwFPItO6Xa5RVHvFUsdlsJyEYgc97/HgxEo6ecIhRHydbRGcecXVkk/EZwMmJGYEx3AnlN8iyjLM5h+R7SH3/NdC/YHHi3kNf4R1TI9T0m3c6e0O3eSuXErsj4N3JKVSZ5TnQoOA8+hS267t9Rh5WWMDfM58ON2GzyqEPU48NKDxmix+ZXvnxieJcryjdB+/bWxGDtGIn8FTqyDwUOgN8jdzdXAN3VXoNf0PJRAjnIfBr5w+T6YBoom29D6fkj9U0D+CwGr6PrgDdAKvUah24H/5e6qoJU3CG03IvUuB/zJgQfy7dIebSuUCECR5cGkoELb5VVvPTnoMRT4TVuU/gqjh8xdxL193Vdo1y7FG1xgzOJgDeAf6LgbzAZF0wwquAF8CqwAsr5FbGBR9yxk+8HqzuAyMB3kTWMQeAwYCgo7+1woMcuQzf2yrzEbkedGnklNBs8AvfefwVjgH4p0i9YrRN2v0FBnU/k94DNgR7AG0MasXl478yLbdjywbRrpIZ8rftHkm5rzgRFFJFT3NfZO4NcgJceKNkXKp2V6Kw21aTJ2n2cMXYGivh3dBuwOhoMNwJIgD1KfMeAP4FbwGHiN+pvNPdhaJ+QbWNyHhL+BkWA/sCdYFwwCrZDjwM+LbgTaMgm8Tl2NxjksrVNFUQxZDBGbgdSB9SRRJdLvM9yG2cCGnG+i4NukHUHYog2Dga9nVwTalpUex6ZcwnL0cdVcE/g6vFlHTqRe27RQQifbZhXQTB/1cIxMRa+u7QTll+bZyiBSHrZepRfQ/Y2sGmCjOwXP7xxL64CNE3i9FjDqNM/x1VNEYT+6uDuOXgRPA53To+Ap4ByahW55Lo6IbE7Y5ljUAa8ANgfbA+e/zms54PjQ/pTsZ23RQfkR+BPgEfAg0BbztKXw8dDlWTHCidWMVGhuGYo1UySSj02e0XXZGCmT8Lybp43oEdIhzzqb2RrVKZVTq1vW8qmcstNavVupH1tdBJ3AwsluauSp4/ar9Z4WRSMpndI04ITWMenE3kKn0p0U9f4LJX2oLepvmjoxnbH31ZTaoj3qr32zsaXUYCU0kaq1HrgeaIGBFmDVfm8RckGstyi6XXaBz3XxK7rtscvApdamSqCS2NKrxwD/D12R5bsQORWxAAAAAElFTkSuQmCC" alt="RESO">
+    <span class="brand-name">Offer Management</span>
+  </a>
+  <nav class="site-nav" aria-label="Site">
+    <a href="../">Home</a>
+    <a href="../how-it-works/">How It Works</a>
+    <a href="../specification/">Specification</a>
+    <a href="../playground/" aria-current="page">Playground</a>
+    <a href="../tools/">Tools</a>
+  </nav>
+  <button class="theme-toggle" id="resoThemeBtn" type="button"
+          aria-label="Switch between light and dark"><span id="resoThemeIcon">&#9789;</span></button>
+</header>
+<div class="wrap">
+  <header class="mast">
+<script id="reso-house-chrome-pre">
+(function () {
+  try {
+    var t = localStorage.getItem('dd-theme');
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) { /* storage blocked; the OS preference still applies */ }
+})();
+</script>
+
+<style id="reso-house-chrome-css">
+  /* The site footer, ported in, for the same reason the header was: Jekyll
+     copies this file verbatim so it never gets _layouts/default.html. Mirrors
+     assets/site.css, with display set explicitly to beat the bare `footer`
+     rule above. */
+  .site-footer{display:block;background:#1a2f58;color:rgba(255,255,255,.6);
+    text-align:center;padding:1.5rem;font-size:.8125rem;margin:2rem 0 0}
+  .site-footer .wrap{max-width:none;margin:0}
+  .site-footer p{margin:0}
+  .site-footer a{color:rgba(255,255,255,.8);text-decoration:none}
+  .site-footer a:hover,.site-footer a:focus{color:#ff9900;text-decoration:underline}
+
+  /* The site header, ported in. Jekyll copies this file verbatim so it never
+     gets _layouts/default.html; these rules mirror assets/site.css exactly so
+     the playground is not the one page with different chrome. */
+  .reso-header{background:#1a2f58;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);
+    position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;
+    gap:.5rem 1.5rem;min-height:64px;padding:.7rem 1.5rem}
+  .reso-header .brand{display:inline-flex;align-items:center;gap:.75rem;color:#fff;
+    text-decoration:none;font-weight:700;font-size:1.1rem;letter-spacing:-.01em}
+  .reso-header .brand img{height:36px;width:auto;display:block}
+  .reso-header .site-nav{display:flex;flex-wrap:wrap;gap:.15rem .35rem;margin-left:auto}
+  .reso-header .site-nav a{color:#fff;font-weight:600;font-size:.95rem;text-decoration:none;
+    padding:.3rem .55rem;border-radius:4px;opacity:.88}
+  .reso-header .site-nav a:hover,.reso-header .site-nav a:focus{opacity:1;
+    background:rgba(255,255,255,.14)}
+  .reso-header .site-nav a[aria-current="page"]{opacity:1;background:rgba(255,255,255,.14)}
+  .reso-header .theme-toggle{background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:7px;width:34px;height:34px;
+    margin-left:.75rem;cursor:pointer;display:inline-flex;align-items:center;
+    justify-content:center;font-size:15px;line-height:1;padding:0;flex:0 0 auto}
+  .reso-header .theme-toggle:hover{background:rgba(255,255,255,.22)}
+  .reso-header .theme-toggle:focus-visible{outline:2px solid #ff9900;outline-offset:2px}
+  @media (max-width:640px){
+    .reso-header .site-nav{margin-left:0;width:100%}
+    .reso-header .brand{font-size:1rem}
+  }
+</style>
+
+    <div class="eyebrow">RCP-57 &middot; Offer Management &middot; Simulation</div>
+    <h1>Two sides of an offer</h1>
+    <p>A listing arrives in RESO Common Format, most often from an MLS Web API but from any source
+      that speaks it. Once it is published for offers, each side answers from its own system. Play
+      both desks below. Nothing is saved and nothing leaves this page.</p>
+  </header>
+
+  <section class="listing">
+    <div class="addr">1803 Bayshore Rd, Chicago IL</div>
+    <dl>
+      <div><dt>Asking</dt><dd id="ask">$549,000</dd></div>
+      <div><dt>Listing</dt><dd>11284417</dd></div>
+      <div><dt>Status</dt><dd id="lstatus">Active</dd></div>
+    </dl>
+    <div class="prov" id="prov"></div>
+  </section>
+
+  <section class="net" aria-live="polite">
+    <span class="dot" id="netDot"></span>
+    <span><span class="nm">Offer Hub</span><br><span class="sub">A private network. Participants sign in, then act on their own offers.</span></span>
+    <span class="count" id="netCount">0 of 2 signed in</span>
+  </section>
+
+  <div class="desks">
+    <section class="desk lister" id="deskLister">
+      <div class="desk-head">
+        <span class="who">BA</span>
+        <span><span class="who-name">Bob Agent</span><br><span class="who-role">Listing agent &middot; Lakeview Group</span></span>
+        <span class="bell" id="bellLister">New</span>
+      </div>
+      <div class="thread" id="threadLister"></div>
+      <div id="paneLister"></div>
+    </section>
+
+      <section class="desk buyer" id="deskBuyer">
+      <div class="desk-head">
+        <span class="who">AA</span>
+        <span><span class="who-name">Amy Agent</span><br><span class="who-role">Buyer&rsquo;s agent &middot; Northside Realty</span></span>
+        <span class="bell" id="bellBuyer">New</span>
+      </div>
+      <div class="thread" id="threadBuyer"></div>
+      <div id="paneBuyer"></div>
+    </section>
+    </div>
+
+  <details class="wire">
+    <summary>Show what actually crossed the network</summary>
+    <div class="inner">
+      <div>
+        <h4>The activity</h4>
+        <p class="cap">Travels between the two systems. Carries who acted, when, and what it answers.</p>
+        <div id="wirePure" class="pure"></div>
+        <pre id="wireAct">Make an offer to see this.</pre>
+      </div>
+      <div>
+        <h4>The payload</h4>
+        <p class="cap">Sits behind a link that refuses anyone who is not a party to this offer.</p>
+        <pre id="wirePayHdr" style="display:none;margin-bottom:8px"></pre>
+        <pre id="wirePay">Make an offer to see this.</pre>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    <span>Session only &middot; no account, no database, nothing kept.</span>
+    <button type="button" id="reset">Start over</button>
+  </footer>
+</div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><a href="https://www.reso.org/">Real Estate Standards Organization</a> &middot; <a href="https://github.com/RESOStandards/reso-offer-management">This site on GitHub</a> &middot; <a href="https://github.com/RESOStandards/transport/issues/252">RCP-57 on RESO Transport</a></p>
+    </div>
+  </footer>
+
+<script type="module">
+/* ===================================================================
+ * ap.js, inlined verbatim from the shared module so the page is one
+ * self-contained document. The export keywords are legal inside an inline
+ * module and export nothing. Diff this block against ap.js to confirm.
+ * =================================================================== */
+/**
+ * A local ActivityPub implementation, in the browser, with no dependencies.
+ *
+ * Shared by the RESO specification playgrounds: the ULI Resolution Protocol
+ * (RCP-54) and Offer Management (RCP-57). Both carry the same hardest rule, and
+ * it is a negative one: an activity uses only standard Activity Streams 2.0
+ * vocabulary, and nothing extends the JSON-LD with custom terms. So the test of
+ * this module is not that it delivers messages. It is that the JSON it emits is
+ * indistinguishable from ordinary ActivityPub, and that everything a
+ * specification adds lives in a payload somewhere else.
+ *
+ * That rule is enforced here rather than trusted: `purity()` refuses any term
+ * outside the vocabulary below, and every build function runs through it.
+ *
+ * What this is NOT: a federation layer. Nothing is signed, no HTTP is spoken,
+ * and delivery is between actors held in one page. The server-side reference
+ * implementations use Fedify for the real thing. Here, "the network" is a map.
+ *
+ * No classes and no `this`: factory functions returning frozen plain objects,
+ * which is also what makes the output trivially JSON-serialisable.
+ */
+
+export const AS2 = 'https://www.w3.org/ns/activitystreams';
+export const PUBLIC = `${AS2}#Public`;
+
+/* ---------------------------------------------------------------------------
+ * The vocabulary, and the purity gate over it
+ * ------------------------------------------------------------------------ */
+
+/** Object types the two specifications use. */
+export const OBJECT_TYPES = Object.freeze(['Note', 'Tombstone', 'Collection', 'OrderedCollection']);
+
+/**
+ * Activity types the two specifications use.
+ * RCP-54 resolution: Create (mint), Note (broadcast and replies), Delete with a
+ * Tombstone (supersession). RCP-57 offers: Offer, Accept, Reject, Note.
+ */
+export const ACTIVITY_TYPES = Object.freeze(['Create', 'Delete', 'Offer', 'Accept', 'Reject', 'Update']);
+
+/** Link and tag types. */
+export const LINK_TYPES = Object.freeze(['Link', 'Mention']);
+
+export const ACTOR_TYPES = Object.freeze(['Person', 'Service', 'Organization', 'Application', 'Group']);
+
+/**
+ * Every Activity Streams term either specification needs. A key outside this
+ * set is the failure both specs forbid, so it is refused rather than passed on.
+ */
+const TERMS = Object.freeze(new Set([
+  '@context', 'id', 'type',
+  'actor', 'object', 'target', 'origin', 'result', 'instrument',
+  'attributedTo', 'inReplyTo', 'context', 'tag', 'url', 'href', 'mediaType', 'rel',
+  'to', 'cc', 'bto', 'bcc', 'audience',
+  'published', 'updated', 'startTime', 'endTime',
+  'name', 'summary', 'content', 'mediaType',
+  'inbox', 'outbox', 'followers', 'following', 'preferredUsername',
+  'items', 'orderedItems', 'totalItems', 'first', 'last', 'next', 'prev', 'partOf', 'current',
+  'replies', 'formerType', 'deleted',
+]));
+
+/**
+ * Refuse anything outside the vocabulary, at every depth.
+ * Returns the offending paths; empty means the document is pure AS2.
+ */
+export const purity = (doc, path = '') => {
+  if (Array.isArray(doc)) return doc.flatMap((v, i) => purity(v, `${path}[${i}]`));
+  if (doc === null || typeof doc !== 'object') return [];
+  return Object.entries(doc).flatMap(([k, v]) =>
+    TERMS.has(k) ? purity(v, path ? `${path}.${k}` : k) : [`${path ? `${path}.` : ''}${k}`]);
+};
+
+/** The context check, kept separate because a wrong context is a different defect. */
+export const contextOk = (doc) => {
+  const c = doc['@context'];
+  return c === AS2 || (Array.isArray(c) && c.length === 1 && c[0] === AS2);
+};
+
+const KNOWN_TYPES = new Set([...OBJECT_TYPES, ...ACTIVITY_TYPES, ...LINK_TYPES, ...ACTOR_TYPES]);
+
+/**
+ * The one place a document becomes real. Drops undefined, freezes the result,
+ * and refuses to emit anything that is not pure AS2 — a programming error here
+ * is worth a throw, because the whole point of the module is that its output
+ * cannot be non-conformant.
+ */
+const seal = (doc) => {
+  const clean = Object.fromEntries(
+    Object.entries(doc).filter(([, v]) => v !== undefined && !(Array.isArray(v) && v.length === 0)));
+  const bad = purity(clean);
+  if (bad.length) throw new Error(`activity carries non-AS2 terms: ${bad.join(', ')}`);
+  if (!KNOWN_TYPES.has(clean.type)) throw new Error(`unknown AS2 type: ${clean.type}`);
+  return Object.freeze(clean);
+};
+
+/* ---------------------------------------------------------------------------
+ * Identifiers
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Activity identifiers are assigned by the server, never by the client — RCP-57
+ * says so explicitly and RCP-54 assumes it. A playground has no server, so this
+ * stands in for one: monotonic per actor, so a thread reads in order.
+ */
+export const makeIdFactory = (origin) => {
+  const counters = new Map();
+  return (actorName, kind) => {
+    const n = (counters.get(actorName) ?? 0) + 1;
+    counters.set(actorName, n);
+    return `${origin}/${actorName}/${kind}/${n}`;
+  };
+};
+
+/* ---------------------------------------------------------------------------
+ * Actors and the local network
+ * ------------------------------------------------------------------------ */
+
+export const actor = ({ id, name, type = 'Service', preferredUsername }) => seal({
+  '@context': AS2,
+  id,
+  type,
+  name,
+  preferredUsername: preferredUsername ?? name,
+  inbox: `${id}/inbox`,
+  outbox: `${id}/outbox`,
+});
+
+/**
+ * A collection an activity may address instead of naming every recipient.
+ * RCP-54's broadcast addresses `reso.org/resolvers` and relies on each member
+ * following it, which is how one Note reaches R resolvers.
+ */
+export const collection = ({ id, name, members }) => seal({
+  '@context': AS2,
+  id,
+  type: 'Collection',
+  name,
+  totalItems: members.length,
+  items: [...members],
+});
+
+/* ---------------------------------------------------------------------------
+ * Vocabulary builders — the union of what RCP-54 and RCP-57 need
+ * ------------------------------------------------------------------------ */
+
+const addressing = ({ to, cc }) => ({
+  to: to === undefined ? undefined : [...to],
+  cc: cc === undefined ? undefined : [...cc],
+});
+
+/** A Note: RCP-54's broadcast and every reply, and RCP-57's state messages. */
+export const note = ({ id, actor: by, inReplyTo, to, cc, published, content, name, url, tag }) => seal({
+  '@context': AS2,
+  id,
+  type: 'Note',
+  attributedTo: by,
+  inReplyTo,
+  ...addressing({ to, cc }),
+  published,
+  name,
+  content,
+  url,
+  tag,
+});
+
+/**
+ * A payload reference. Both specifications keep their actual records out of the
+ * activity and behind an OAuth2-protected URL, so this Link is the only trace
+ * of them on the wire.
+ */
+export const payloadLink = ({ href, mediaType = 'application/json' }) =>
+  seal({ type: 'Link', href, mediaType });
+
+/** A Mention, which is RCP-54's mechanism for designating a mandatory resolver. */
+export const mention = ({ href, name }) => seal({ type: 'Mention', href, name });
+
+/** Create: RCP-54 mints a ULI by posting it to the thread. */
+export const create = ({ id, actor: by, object, inReplyTo, to, cc, published }) => seal({
+  '@context': AS2,
+  id,
+  type: 'Create',
+  actor: by,
+  object,
+  inReplyTo,
+  ...addressing({ to, cc }),
+  published,
+});
+
+/**
+ * A Tombstone with a redirect. RCP-54 supersedes a ULI by tombstoning it toward
+ * its successor, and the redirect target is the successor's URN rather than a
+ * resolvable link, so nothing identifying rides the wire.
+ */
+export const tombstone = ({ id, formerType = 'Note', deleted, url }) => seal({
+  '@context': AS2, id, type: 'Tombstone', formerType, deleted, url,
+});
+
+export const del = ({ id, actor: by, object, inReplyTo, to, cc, published }) => seal({
+  '@context': AS2, id, type: 'Delete', actor: by, object, inReplyTo, ...addressing({ to, cc }), published,
+});
+
+/** RCP-57: an offer, and a counter, which is the same activity on a new parent. */
+export const offer = ({ id, actor: by, inReplyTo, to, cc, attributedTo, published, url }) => seal({
+  '@context': AS2,
+  id, type: 'Offer', actor: by, inReplyTo, ...addressing({ to, cc }),
+  attributedTo: attributedTo === undefined ? undefined : [...attributedTo],
+  published, url,
+});
+
+export const accept = ({ id, actor: by, object, to, cc, published }) => seal({
+  '@context': AS2, id, type: 'Accept', actor: by, object, ...addressing({ to, cc }), published,
+});
+
+export const reject = ({ id, actor: by, object, to, cc, published }) => seal({
+  '@context': AS2, id, type: 'Reject', actor: by, object, ...addressing({ to, cc }), published,
+});
+
+/* ---------------------------------------------------------------------------
+ * Storage
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Storage is pluggable so the same code runs in a page and in a test. The
+ * browser store wraps every call: a private window, blocked site data or a
+ * thumbnail capture makes these throw or return nothing, and a playground must
+ * render correctly anyway.
+ */
+export const memoryStore = () => {
+  const m = new Map();
+  return Object.freeze({
+    get: (k) => m.get(k),
+    set: (k, v) => { m.set(k, v); },
+    keys: () => [...m.keys()],
+    clear: () => { m.clear(); },
+  });
+};
+
+export const localStore = (prefix) => {
+  const key = (k) => `${prefix}:${k}`;
+  const safe = (fn, fallback) => { try { return fn(); } catch { return fallback; } };
+  return Object.freeze({
+    get: (k) => safe(() => {
+      const raw = localStorage.getItem(key(k));
+      return raw === null ? undefined : JSON.parse(raw);
+    }, undefined),
+    set: (k, v) => safe(() => { localStorage.setItem(key(k), JSON.stringify(v)); }, undefined),
+    keys: () => safe(() => Object.keys(localStorage)
+      .filter((k) => k.startsWith(`${prefix}:`))
+      .map((k) => k.slice(prefix.length + 1)), []),
+    clear: () => safe(() => {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith(`${prefix}:`))
+        .forEach((k) => localStorage.removeItem(k));
+    }, undefined),
+    /** What a Clear control should be able to show before it wipes anything. */
+    stats: () => safe(() => {
+      const ks = Object.keys(localStorage).filter((k) => k.startsWith(`${prefix}:`));
+      return { entries: ks.length, bytes: ks.reduce((n, k) => n + k.length + (localStorage.getItem(k) ?? '').length, 0) };
+    }, { entries: 0, bytes: 0 }),
+  });
+};
+
+/* ---------------------------------------------------------------------------
+ * The network: actors, delivery, and an age sweep
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Delivery resolves each addressee to local inboxes. A collection expands to
+ * its members, which is what lets RCP-54 post one Note to the resolver
+ * collection and have it arrive R times.
+ */
+const expand = (addressees, collections) =>
+  [...new Set(addressees.flatMap((a) => {
+    const c = collections.get(a);
+    return c ? c.items : [a];
+  }))];
+
+/**
+ * A local network. `maxAgeMs` makes persistence ephemeral as the playgrounds
+ * want: threads survive a browser restart and are swept once they are old,
+ * so the page keeps state without becoming a database of licensee records.
+ */
+export const network = ({ store = memoryStore(), origin = 'https://local.example', maxAgeMs = 7 * 24 * 3600 * 1000, now = () => Date.now() } = {}) => {
+  const actors = new Map();
+  const collections = new Map();
+  const nextId = makeIdFactory(origin);
+
+  const load = () => store.get('activities') ?? [];
+  const save = (xs) => store.set('activities', xs);
+
+  /** Drop anything past its age, so "for some time, but ephemeral" is real. */
+  const sweep = () => {
+    const cutoff = now() - maxAgeMs;
+    const kept = load().filter((r) => (r.receivedAt ?? 0) >= cutoff);
+    if (kept.length !== load().length) save(kept);
+    return kept;
+  };
+
+  const addActor = (a) => { actors.set(a.id, a); return a; };
+  const addCollection = (c) => { collections.set(c.id, c); return c; };
+
+  /**
+   * Post an activity. Returns the delivery record rather than throwing on an
+   * unknown addressee: an undeliverable recipient is a normal outcome to show,
+   * not an exception.
+   */
+  const post = (activity) => {
+    const addressed = expand([...(activity.to ?? []), ...(activity.cc ?? [])], collections);
+    const delivered = addressed.filter((a) => actors.has(a) || a === PUBLIC);
+    const undeliverable = addressed.filter((a) => !delivered.includes(a));
+    const record = Object.freeze({
+      activity,
+      from: activity.actor ?? activity.attributedTo,
+      delivered,
+      undeliverable,
+      receivedAt: now(),
+    });
+    save([...sweep(), record]);
+    return record;
+  };
+
+  /** What one actor can see: what it sent, and what was addressed to it. */
+  const inboxOf = (actorId) => sweep().filter((r) =>
+    r.delivered.includes(actorId) || r.from === actorId || r.delivered.includes(PUBLIC));
+
+  return Object.freeze({
+    origin,
+    nextId,
+    addActor,
+    addCollection,
+    actors: () => [...actors.values()],
+    collections: () => [...collections.values()],
+    post,
+    inboxOf,
+    all: () => sweep(),
+    stats: () => (store.stats ? store.stats() : { entries: sweep().length, bytes: null }),
+    clear: () => { store.clear(); },
+  });
+};
+
+/* ---------------------------------------------------------------------------
+ * Threads
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Assemble a thread from `inReplyTo`, which is the only threading mechanism
+ * either specification uses. Returns roots with nested replies, each node
+ * carrying its delivery record so a renderer can show who received what.
+ *
+ * Both playgrounds need a thread view, and RCP-57's needs one it does not yet
+ * have, so this is deliberately shaped around activities and not around either
+ * specification's semantics.
+ */
+export const thread = (records) => {
+  const byId = new Map(records.map((r) => [r.activity.id, { record: r, replies: [] }]));
+  const roots = [];
+  records.forEach((r) => {
+    const node = byId.get(r.activity.id);
+    const parentId = r.activity.inReplyTo;
+    const parent = parentId === undefined ? undefined : byId.get(parentId);
+    // An activity replying to something outside the set is a root here, so a
+    // partial view (one actor's inbox) still renders rather than vanishing.
+    if (parent) parent.replies.push(node); else roots.push(node);
+  });
+  const sortRec = (ns) => {
+    ns.sort((a, b) => (a.record.receivedAt ?? 0) - (b.record.receivedAt ?? 0));
+    ns.forEach((n) => sortRec(n.replies));
+    return ns;
+  };
+  return sortRec(roots);
+};
+
+/** Flatten a thread to rows with depth, which is what a table or list wants. */
+export const flatten = (nodes, depth = 0) =>
+  nodes.flatMap((n) => [{ ...n.record, depth }, ...flatten(n.replies, depth + 1)]);
+
+/* ---------------------------------------------------------------------------
+ * Conformance self-checks
+ * ------------------------------------------------------------------------ */
+
+/**
+ * The checks a playground can run against its own output and display. Both
+ * specifications' negative rule is checkable, so the page can state that it
+ * verified rather than asserting that it complies.
+ */
+export const conformance = (records) => {
+  const docs = records.map((r) => r.activity);
+  const impure = docs.flatMap((d) => purity(d).map((p) => ({ id: d.id, term: p })));
+  const badContext = docs.filter((d) => !contextOk(d)).map((d) => d.id);
+  return Object.freeze({
+    activities: docs.length,
+    pureAS2: impure.length === 0,
+    impure,
+    contextCorrect: badContext.length === 0,
+    badContext,
+  });
+};
+
+/* End of ap.js. Playground code begins. */
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var money=function(n){return '$'+Number(n).toLocaleString('en-US');};
+  var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+
+  var BLANK={turns:[],seq:0,done:null,unread:{buyer:false,lister:false},composing:null,t:0,auth:{buyer:null,lister:null},published:false};
+  var S=JSON.parse(JSON.stringify(BLANK));
+  try{var raw=sessionStorage.getItem('rcp57-sim');if(raw)S=JSON.parse(raw);}catch(e){}
+  function save(){try{sessionStorage.setItem('rcp57-sim',JSON.stringify(S));}catch(e){}}
+
+  var CLOCK=['9:12 am','10:04 am','11:36 am','1:20 pm','2:58 pm','4:15 pm','5:40 pm'];
+  function stamp(){return CLOCK[Math.min(S.t++,CLOCK.length-1)];}
+
+  function last(){return S.turns.length?S.turns[S.turns.length-1]:null;}
+  function waitingOn(){var l=last();if(!l)return 'buyer';return l.by==='buyer'?'lister':'buyer';}
+
+  function toast(msg){
+    var old=document.querySelector('.toast');if(old)old.remove();
+    var el=document.createElement('div');el.className='toast';el.setAttribute('role','status');
+    el.innerHTML=msg;document.body.appendChild(el);
+    setTimeout(function(){if(el.parentNode)el.remove();},4200);
+  }
+
+  function push(turn){
+    S.seq+=1;turn.seq=S.seq;turn.at=stamp();S.turns.push(turn);
+    var to=turn.by==='buyer'?'lister':'buyer';
+    S.unread[to]=true;S.composing=null;
+    save();render();
+    var name=to==='lister'?'Bob Agent':'Amy Agent';
+    toast('<b>'+esc(name)+'</b> was notified &middot; '+esc(turn.headline));
+  }
+
+  function renderThread(side){
+    var box=$('thread'+(side==='buyer'?'Buyer':'Lister'));
+    if(!S.turns.length){
+      box.innerHTML='<p class="empty">No offers yet on this listing.</p>';return;
+    }
+    box.innerHTML=S.turns.map(function(t){
+      var mine=t.by===side;
+      var who=t.by==='buyer'?'Amy Agent':'Bob Agent';
+      var terms='';
+      if(t.terms){
+        terms='<div class="terms">'+
+          '<div>Price<b>'+money(t.terms.price)+'</b></div>'+
+          '<div>Earnest<b>'+money(t.terms.earnest)+'</b></div>'+
+          '<div>Financing<b>'+esc(t.terms.financing)+'</b></div>'+
+          '<div>Closing<b>'+esc(t.terms.closing)+'</b></div>'+
+          (t.terms.contingency?'<div>Contingencies<b>'+esc(t.terms.contingency)+'</b></div>':'')+
+        '</div>';
+      }
+      return '<article class="msg'+(mine?' mine':'')+'">'+
+        '<div class="msg-top"><span class="msg-who">'+esc(who)+'</span>'+
+        (t.pill?'<span class="pill '+t.pill[1]+'">'+esc(t.pill[0])+'</span>':'')+
+        '<span class="msg-time">'+esc(t.at)+'</span></div>'+
+        '<div class="msg-body">'+esc(t.headline)+'</div>'+terms+'</article>';
+    }).join('');
+    box.scrollTop=box.scrollHeight;
+  }
+
+  function composeForm(side,kind){
+    var l=last();var base=l&&l.terms?l.terms:{price:530000,earnest:15000,financing:'Conventional',closing:'2026-11-02',contingency:'Inspection, financing'};
+    var verb=kind==='offer'?'Send offer':'Send counter';
+    return '<form class="compose" id="form'+side+'">'+
+      '<div class="row">'+
+        '<div><label for="p'+side+'">Offer price</label><input id="p'+side+'" type="number" step="1000" value="'+base.price+'"></div>'+
+        '<div><label for="e'+side+'">Earnest money</label><input id="e'+side+'" type="number" step="500" value="'+base.earnest+'"></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div><label for="f'+side+'">Financing</label><select id="f'+side+'">'+
+          ['Conventional','Cash','FHA','VA'].map(function(o){return '<option'+(o===base.financing?' selected':'')+'>'+o+'</option>';}).join('')+
+        '</select></div>'+
+        '<div><label for="c'+side+'">Closing date</label><input id="c'+side+'" type="date" value="'+base.closing+'"></div>'+
+      '</div>'+
+      '<div><label for="g'+side+'">Contingencies</label><input id="g'+side+'" type="text" value="'+esc(base.contingency)+'" placeholder="Inspection, financing"></div>'+
+      '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+        '<button class="btn primary" type="submit">'+verb+'</button>'+
+        '<button class="btn" type="button" data-cancel>Cancel</button>'+
+      '</div>'+
+    '</form>';
+  }
+
+  var WHOIS={
+    buyer:{u:'amy@northside.example',p:'demo-password',org:'Northside Realty',
+      lead:'Sign in to make offers on listings published to this network.',
+      cta:'Sign in as a buyer\u2019s agent'},
+    lister:{u:'bob@lakeview.example',p:'demo-password',org:'Lakeview Group',
+      lead:'Sign in to publish listings and answer the offers that arrive.',
+      cta:'Sign in to Offer Hub'}
+  };
+
+  function renderSignIn(side){
+    var w=WHOIS[side];
+    return '<form class="signin" id="in'+side+'">'+
+      '<p class="lead">'+esc(w.lead)+'</p>'+
+      '<div><label for="u'+side+'">Email</label><input id="u'+side+'" type="email" value="'+esc(w.u)+'" autocomplete="username"></div>'+
+      '<div><label for="k'+side+'">Password</label><input id="k'+side+'" type="password" value="'+esc(w.p)+'" autocomplete="current-password"></div>'+
+      '<button class="btn primary" type="submit">'+esc(w.cta)+'</button>'+
+      '<p class="fine">Filled in for you. Signing in puts you on the network; it does not by itself give you any offer.</p>'+
+    '</form>';
+  }
+
+  function renderPane(side){
+    var pane=$('pane'+(side==='buyer'?'Buyer':'Lister'));
+    var l=last();
+
+    if(!S.auth[side]){
+      pane.innerHTML=renderSignIn(side);
+      $('in'+side).addEventListener('submit',function(ev){
+        ev.preventDefault();
+        // A stand-in for a real grant. Never a credential, and never sent anywhere.
+        S.auth[side]={token:'ohub_'+side+'_'+Math.random().toString(36).slice(2,10),org:WHOIS[side].org};
+        save();render();
+        toast('Signed in as <b>'+esc(WHOIS[side].u)+'</b> \u00b7 on the network');
+      });
+      return;
+    }
+
+    if(S.done){
+      var t=S.done==='accepted'?'This offer was accepted.':S.done==='rejected'?'This offer was rejected.':'This offer was withdrawn.';
+      pane.innerHTML='<div class="actions"><span class="waiting">'+esc(t)+'</span></div>';return;
+    }
+    if(S.composing===side){
+      pane.innerHTML=composeForm(side,l?'counter':'offer');
+      var f=$('form'+side);
+      f.addEventListener('submit',function(ev){
+        ev.preventDefault();
+        var terms={price:+$('p'+side).value,earnest:+$('e'+side).value,financing:$('f'+side).value,closing:$('c'+side).value,contingency:$('g'+side).value};
+        push({by:side,kind:l?'counter':'offer',terms:terms,
+          headline:(l?'Countered at ':'Offered ')+money(terms.price),
+          pill:[l?'Counter':'Offer','p-open']});
+      });
+      f.querySelector('[data-cancel]').addEventListener('click',function(){S.composing=null;save();render();});
+      return;
+    }
+
+    if(side==='lister'&&!S.published){
+      pane.innerHTML='<div class="actions">'+
+        '<button class="btn primary" data-pub>Publish to Offer Hub</button>'+
+        '<span class="waiting">Received as RESO Common Format. Not yet open for offers.</span></div>';
+      pane.querySelector('[data-pub]').addEventListener('click',function(){
+        S.published=true;S.unread.buyer=true;save();render();
+        toast('Listing published \u00b7 <b>open for offers</b>');
+      });
+      return;
+    }
+    if(side==='buyer'&&!S.published){
+      pane.innerHTML='<div class="actions"><span class="waiting">This listing is not open for offers yet.</span></div>';
+      return;
+    }
+
+    var turn=waitingOn();
+    if(turn!==side){
+      var other=side==='buyer'?'Bob':'Amy';
+      pane.innerHTML='<div class="actions"><span class="waiting">Waiting on '+esc(other)+'.</span></div>';
+      return;
+    }
+
+    var btns='';
+    if(!l){
+      btns='<button class="btn primary" data-act="compose">Make an offer</button>';
+    }else{
+      btns='<button class="btn primary" data-act="accept">Accept '+money(l.terms.price)+'</button>'+
+           '<button class="btn" data-act="compose">Counter</button>'+
+           '<button class="btn quiet" data-act="'+(side==='buyer'?'withdraw':'reject')+'">'+(side==='buyer'?'Withdraw':'Reject')+'</button>';
+    }
+    pane.innerHTML='<div class="actions">'+btns+'</div>';
+    Array.prototype.forEach.call(pane.querySelectorAll('[data-act]'),function(b){
+      b.addEventListener('click',function(){
+        var a=b.getAttribute('data-act');
+        if(a==='compose'){S.composing=side;save();render();return;}
+        if(a==='accept'){S.done='accepted';push({by:side,kind:'accept',headline:'Accepted at '+money(l.terms.price),pill:['Accepted','p-done']});return;}
+        if(a==='reject'){S.done='rejected';push({by:side,kind:'reject',headline:'Rejected the offer',pill:['Rejected','p-end']});return;}
+        S.done='withdrawn';push({by:side,kind:'withdraw',headline:'Withdrew the offer',pill:['Withdrawn','p-end']});
+      });
+    });
+  }
+
+  function paint(v){
+    return esc(JSON.stringify(v,null,2))
+      .replace(/^(\s*)&quot;([^&]+)&quot;:/gm,'$1<span class="k">"$2"</span>:')
+      .replace(/: (&quot;[^&]*&quot;)/g,': <span class="s">$1</span>')
+      .replace(/: (-?\d+)/g,': <span class="n">$1</span>');
+  }
+
+  function renderWire(){
+    var l=last();
+    if(!l){$('wireAct').textContent='Make an offer to see this.';$('wirePay').textContent='Make an offer to see this.';return;}
+    var mine=l.by==='buyer'?'https://listing.network/AmyAgent':'https://listing.network/BobAgent';
+    var theirs=l.by==='buyer'?'https://listing.network/BobAgent':'https://listing.network/AmyAgent';
+    var ROOT='https://listing.network/BobAgent/133';
+    var actId=function(n){return 'https://offers.example/act/'+n;};
+    /* An Accept or Reject names the submission it answers, which in a countered
+     * negotiation is the most recent counter rather than the original offer.
+     * Only offers and counters carry terms, so those are the submissions. */
+    var answered=S.turns.filter(function(t){return !!t.terms;}).pop();
+    var answeredId=answered?actId(answered.seq):ROOT;
+    var act;
+    if(l.kind==='accept'){
+      act=accept({id:actId(l.seq),actor:mine,object:answeredId,to:[theirs]});
+    }else if(l.kind==='reject'){
+      act=reject({id:actId(l.seq),actor:mine,object:answeredId,to:[theirs]});
+    }else if(l.kind==='withdraw'){
+      /* Withdrawal has no Activity Streams verb of its own. The state travels
+       * as a Note rather than inventing a term for it, which is also why the
+       * reference implementation has no Undo anywhere. */
+      act=note({id:actId(l.seq),actor:mine,inReplyTo:ROOT,to:[theirs],
+        content:'Withdrawn. The negotiation is ended and takes no further turns.'});
+    }else{
+      act=offer({id:actId(l.seq),actor:mine,inReplyTo:ROOT,to:[theirs],
+        url:l.terms?payloadLink({href:'https://offers.example/payload/'+l.seq}):undefined});
+    }
+    /* Built by the shared module, so a non-AS2 term would have thrown above
+     * rather than reached the wire. Checked again here so the page can show it. */
+    var stray=purity(act);
+    var pure=stray.length===0&&contextOk(act);
+    $('wirePure').className=pure?'pure ok':'pure bad';
+    $('wirePure').textContent=pure
+      ?'Pure Activity Streams 2.0: no term outside the vocabulary, @context correct.'
+      :'Carries non-AS2 terms: '+stray.join(', ');
+    $('wireAct').innerHTML=paint(act);
+    var tok=S.auth[l.by]?S.auth[l.by].token:null;
+    if(tok&&l.terms){
+      $('wirePayHdr').textContent='GET /payload/'+l.seq+'\nAuthorization: Bearer '+tok;
+      $('wirePayHdr').style.display='block';
+    }else{$('wirePayHdr').style.display='none';}
+
+    if(!l.terms){
+      $('wirePay').textContent='No payload. This act changes no terms, so it creates no submission.';
+      return;
+    }
+    $('wirePay').innerHTML=paint({'@reso.context':'urn:reso:metadata:2.1:resource:offersubmission',
+      OfferId:'OFFER-11284417-1',OfferSubmissionSequence:l.seq,
+      OfferSubmissionStatus:l.kind==='counter'?'Countered':'Submitted',
+      PurchasePrice:l.terms.price,EarnestMoney:l.terms.earnest,
+      BuyerFinancing:[l.terms.financing],Contingency:l.terms.contingency,
+      RequestedClosingDate:l.terms.closing,
+      OfferBuyerFirstName:'Dana',OfferBuyerLastName:'Okonkwo'});
+  }
+
+  function render(){
+    var on=['buyer','lister'].filter(function(s){return !!S.auth[s];}).length;
+    $('netCount').textContent=on+' of 2 signed in';
+    $('netDot').classList.toggle('live',on>0);
+    ['buyer','lister'].forEach(function(s){
+      var head=$('desk'+(s==='buyer'?'Buyer':'Lister')).querySelector('.desk-head');
+      var chip=head.querySelector('.tokenchip');
+      if(S.auth[s]){
+        if(!chip){chip=document.createElement('span');chip.className='tokenchip';head.insertBefore(chip,head.querySelector('.bell'));}
+        chip.textContent=S.auth[s].token;chip.title='Bearer token for this session';
+      }else if(chip){chip.remove();}
+      renderThread(s);renderPane(s);
+      var bell=$('bell'+(s==='buyer'?'Buyer':'Lister'));
+      bell.classList.toggle('on',!!S.unread[s]);
+    });
+    $('lstatus').textContent=S.done==='accepted'?'Pending':'Active';
+    document.querySelector('.listing').classList.toggle('unpub',!S.published);
+    $('prov').innerHTML=
+      '<span class="step done"><b>Entered by the broker</b></span>'+
+      '<span class="arrow">&rarr;</span>'+
+      '<span class="step done"><b>RESO Common Format</b> from an MLS Web API or another source</span>'+
+      '<span class="arrow">&rarr;</span>'+
+      '<span class="step'+(S.published?' done':'')+'"><b>'+(S.published?'Open for offers on Offer Hub':'Not yet on Offer Hub')+'</b></span>';
+    renderWire();
+    // Seeing your own desk clears its badge, the way opening an inbox does.
+    ['buyer','lister'].forEach(function(s){
+      var desk=$('desk'+(s==='buyer'?'Buyer':'Lister'));
+      desk.onclick=function(){if(S.unread[s]){S.unread[s]=false;save();
+        $('bell'+(s==='buyer'?'Buyer':'Lister')).classList.remove('on');}};
+    });
+  }
+
+  $('reset').addEventListener('click',function(){
+    S=JSON.parse(JSON.stringify(BLANK));
+    save();render();toast('Cleared. Nothing was stored.');
+  });
+
+  render();
+})();
+</script>
+
+<script id="reso-house-chrome-post">
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('resoThemeBtn');
+  var icon = document.getElementById('resoThemeIcon');
+  var isDark = function () {
+    var set = root.getAttribute('data-theme');
+    if (set) return set === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+  var paint = function () { icon.innerHTML = isDark() ? '&#9728;' : '&#9789;'; };
+  btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('dd-theme', next); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>

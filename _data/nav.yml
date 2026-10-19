@@ -1,0 +1,13 @@
+# Site navigation, in order. The playground entry points at a plain .html file
+# with no front matter: Jekyll copies it verbatim, so it carries no nav of its
+# own and never gets the current-page mark.
+- title: Home
+  url: /
+- title: How It Works
+  url: /how-it-works/
+- title: Specification
+  url: /specification/
+- title: Playground
+  url: /playground/
+- title: Tools
+  url: /tools/
