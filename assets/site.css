@@ -96,6 +96,10 @@ body {
 
 /* Header and navigation */
 .site-header { background: var(--header-bg); color: var(--header-text); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+/* The header is chrome, not prose, so it spans the window rather than the 780px
+   reading measure: logo hard left, nav hard right, as on tools.reso.org. The
+   content column below is deliberately left narrow. */
+.site-header .wrap { max-width: none; padding-left: 1.5rem; padding-right: 1.5rem; }
 .header-inner { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; min-height: 64px; padding-top: .7rem; padding-bottom: .7rem; }
 .brand { display: inline-flex; align-items: center; gap: .75rem; color: var(--header-text); text-decoration: none; font-weight: 700; font-size: 1.1rem; letter-spacing: -.01em; }
 .brand:hover, .brand:focus { color: var(--header-text); }
