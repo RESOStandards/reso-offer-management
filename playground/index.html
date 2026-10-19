@@ -908,7 +908,7 @@ export const conformance = (records) => {
         if(a==='compose'){S.composing=side;save();render();return;}
         if(a==='accept'){S.done='accepted';push({by:side,kind:'accept',headline:'Accepted at '+money(l.terms.price),pill:['Accepted','p-done']});return;}
         if(a==='reject'){S.done='rejected';push({by:side,kind:'reject',headline:'Rejected the offer',pill:['Rejected','p-end']});return;}
-        S.done='withdrawn';push({by:side,kind:'withdraw',headline:'Withdrew the offer',pill:['Withdrawn','p-end']});
+        if(a==='withdraw'){S.done='withdrawn';push({by:side,kind:'withdraw',headline:'Withdrew the offer',pill:['Withdrawn','p-end']});}
       });
     });
   }
