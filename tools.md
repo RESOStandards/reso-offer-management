@@ -3,11 +3,9 @@ title: Tools
 permalink: /tools/
 description: The reference implementation and the artifacts built alongside it.
 ---
-<!-- Links point at what is in the repository today, verified against
-     RESOStandards/reso-offer-management main on 2026-10-19. The reference
-     implementation and the artifacts are not pushed yet, so the page says so
-     rather than linking a path that does not resolve. When they land, replace
-     the status lines with the links. -->
+<!-- Every link here was resolved against RESOStandards/reso-offer-management main on
+     2026-10-19. The reference implementation and the artifacts are not in the
+     repository yet, which is why this page says so rather than linking them. -->
 # Tools
 
 ## Reference Implementation
