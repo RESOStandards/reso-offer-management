@@ -1,0 +1,37 @@
+# offers.reso.org - Jekyll configuration for GitHub Pages.
+#
+# Mirrors the uli.reso.org shell so the two specification sites read as one
+# system: one layout (_layouts/default.html), one stylesheet (assets/site.css),
+# the RESO logo and a nav (_data/nav.yml).
+title: RESO Offer Management
+description: A standard way for offers to travel between the systems that make and receive them, without either side giving up its own.
+url: https://offers.reso.org
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+
+# The repository also holds the reference implementation and its tooling.
+# GitHub Pages renders any Markdown it finds, so these are kept out of the site
+# and linked from the Tools page instead. Remove an entry to publish it.
+exclude:
+  - README.md
+  - CLAUDE.md
+  - LICENSE
+  - reference/
+  - tools/
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - tsconfig.json
+  - CERTIFICATION-LOG.md
